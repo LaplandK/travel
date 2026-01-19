@@ -20,7 +20,8 @@ const api = {
             notes: notes
         };
         try {
-            const res = await fetch(`${API_BASE}/save`, {
+            // 修改点：将 /save 改为 /submit，与后端 Controller 保持一致
+            const res = await fetch(`${API_BASE}/submit`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
