@@ -14,19 +14,25 @@ public class ApiController {
     @Autowired
     private DataService dataService;
 
-    // 获取所有用户数据
+    // 获取所有用户数据（用于对比）
     @GetMapping("/users")
     public Map<String, UserData> getAllUsers() {
         return dataService.getAllUsers();
     }
 
-    // 保存用户提交
-    @PostMapping("/save")
-    public String saveUser(@RequestBody UserData userData) {
+    // 获取特定用户
+    @GetMapping("/user/{username}")
+    public UserData getUser(@PathVariable String username) {
+        return dataService.getUser(username);
+    }
+
+    // 提交数据
+    @PostMapping("/submit")
+    public String submitUserData(@RequestBody UserData userData) {
         if (userData.getUsername() == null || userData.getUsername().trim().isEmpty()) {
-            throw new IllegalArgumentException("用户名不能为空");
+            return "Error: ID cannot be empty";
         }
         dataService.saveUser(userData);
-        return "success";
+        return "Success";
     }
 }
