@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>旅行默契度测试</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- 引入 html2canvas 用于生成图片 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="logo">CHECKLIST Vol.08</div>
+
+        <!-- 1. 登录页 -->
+        <div id="view-login" class="view active">
+            <div class="card" style="margin-top:50px;">
+                <h2>谁在填表？</h2>
+                <input type="text" id="username" placeholder="请输入你的昵称" maxlength="10">
+                <button class="btn-main" onclick="startApp()">进入 / 开始</button>
+            </div>
+        </div>
+
+        <!-- 2. 新增：模块选择菜单 -->
+        <div id="view-menu" class="view">
+            <h3>请选择板块填写</h3>
+            <!-- 总进度 -->
+            <div class="total-status">当前总进度: <span id="total-percent">0%</span></div>
+
+            <div class="menu-grid" id="menu-container">
+                <!-- JS将在这里生成4个卡片 -->
+            </div>
+
+            <button class="btn-main" id="submit-all-btn" onclick="submitSurvey()"
+                style="margin-top:20px; background:#ccc; cursor:not-allowed;" disabled>
+                填完啦，提交保存！
+            </button>
+        </div>
+
+        <!-- 3. 问卷填写页 -->
+        <div id="view-survey" class="view">
+            <!-- 顶部固定进度条 -->
+            <div class="sticky-header">
+                <div class="nav-row">
+                    <button class="icon-btn" onclick="backToMenu()">↩ 返回</button>
+                    <span id="current-cat-name" style="font-weight:bold;">板块名称</span>
+                    <span style="width:40px"></span> <!-- 占位 -->
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="cat-progress-bar"></div>
+                </div>
+            </div>
+
+            <div id="questions-container" style="margin-top: 20px;"></div>
+
+            <button class="btn-main" onclick="backToMenu()">完成本章，选下一章</button>
+        </div>
+
+        <!-- 4. 结果看板 -->
+        <div id="view-dashboard" class="view">
+            <div class="card">
+                <h2>你的数据已保存 ✅</h2>
+                <div class="action-row">
+                    <button class="btn-outline" onclick="exportMyImage()">📸 生成我的问卷图片</button>
+                </div>
+                <p style="text-align:center; font-size:12px; color:#999; margin-top:10px;">点击下方好友卡片查看默契度对比</p>
+            </div>
+
+            <h3>已完成的好友</h3>
+            <div class="user-list" id="user-list"></div>
+            <button class="back-btn" onclick="logout()" style="width:100%; margin-top:20px;">退出 / 切换账号</button>
+        </div>
+
+        <!-- 5. 对比详情页 -->
+        <div id="view-compare" class="view">
+            <button class="back-btn" onclick="showView('view-dashboard')">← 返回列表</button>
+            <div class="card score-board">
+                <div id="compare-name" style="font-size:14px; margin-bottom:5px;"></div>
+                <div class="percentage" id="score-val">0%</div>
+            </div>
+
+            <h3 style="color:#FF8E8E">🚨 分歧点 (重点关注)</h3>
+            <div id="conflict-list"></div>
+
+            <h3 style="color:#81C784">✨ 默契点</h3>
+            <div id="match-list"></div>
+        </div>
+    </div>
+
+    <!-- 隐藏区域：用于生成图片 -->
+    <div id="export-canvas-container"
+        style="position: absolute; left: -9999px; top:0; width: 375px; background: #F9F7F2; padding: 20px;">
+        <!-- 这里的代码将由JS动态生成 -->
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
