@@ -1,59 +1,56 @@
 package com.travel.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.travel.model.UserData;
-import jakarta.annotation.PostConstruct;
+import com.travel.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class DataService {
 
-    private static final String DB_FILE = "travel_data.json";
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    // 内存缓存
-    private Map<String, UserData> dataCache = new ConcurrentHashMap<>();
+    @Autowired
+    private UserRepository userRepository;
 
-    @PostConstruct
-    public void init() {
-        // 启动时加载数据
-        File file = new File(DB_FILE);
-        if (file.exists()) {
-            try {
-                dataCache = objectMapper.readValue(file, new TypeReference<ConcurrentHashMap<String, UserData>>() {
-                });
-                System.out.println("数据已加载，共 " + dataCache.size() + " 位用户。");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+    // 不再需要 init() 方法，Spring Boot 启动时会自动连接数据库
 
+    /**
+     * 获取所有用户
+     * 说明：从数据库查出 List，转换成 Map 返回，以兼容你的 Controller
+     */
     public Map<String, UserData> getAllUsers() {
-        return dataCache;
+        // 1. 从数据库获取所有列表
+        List<UserData> userList = userRepository.findAll();
+
+        // 2. 将 List<UserData> 转换为 Map<String, UserData>
+        // Key 是 username, Value 是 UserData 对象
+        return userList.stream()
+                .collect(Collectors.toMap(UserData::getUsername, Function.identity()));
     }
 
+    /**
+     * 获取单个用户
+     */
     public UserData getUser(String username) {
-        return dataCache.get(username);
+        // findById 返回的是 Optional，如果没找到返回 null
+        return userRepository.findById(username).orElse(null);
     }
 
-    public synchronized void saveUser(UserData userData) {
+    /**
+     * 保存用户
+     * 说明：不再写入 json 文件，而是直接存入数据库文件 (data/travel_db.mv.db)
+     */
+    public void saveUser(UserData userData) {
+        // 更新时间戳
         userData.setTimestamp(System.currentTimeMillis());
-        dataCache.put(userData.getUsername(), userData);
-        persist();
-    }
 
-    // 持久化到文件
-    private void persist() {
-        try {
-            objectMapper.writeValue(new File(DB_FILE), dataCache);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // JpaRepository 的 save 方法会自动判断：
+        // 如果 username 已存在 -> 更新数据
+        // 如果 username 不存在 -> 插入新数据
+        userRepository.save(userData);
     }
 }
